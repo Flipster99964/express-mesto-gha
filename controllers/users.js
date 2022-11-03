@@ -1,7 +1,7 @@
 const User = require('../models/user');
 
-module.exports.getUser = (req, res) => {
-  User.find({})
+module.exports.getUserById = (req, res) => {
+  User.findById(req.params.userId)
     .then((userId) => res.send({ data: userId }))
     .catch((err) => res.status(500).send({ message: err.message }));
 };
@@ -23,7 +23,7 @@ module.exports.createUser = (req, res) => {
 module.exports.patchUser = (req, res) => {
   const { name, about } = req.body;
 
-  user.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
     .then((user) => {
       if (!user) { return res.status(404).send({ message: 'Пользователь с указанным _id не найден' }); }
       return res.send({ data: user });
@@ -36,7 +36,7 @@ module.exports.patchUser = (req, res) => {
 module.exports.patchAvatar = (req, res) => {
   const { name, avatar } = req.body;
 
-  user.findByIdAndUpdate(req.user._id, { name, avatar }, { new: true })
+  User.findByIdAndUpdate(req.user._id, { name, avatar }, { new: true })
     .then((user) => {
       if (!user) { return res.status(404).send({ message: 'Пользователь с указанным _id не найден' }); }
       return res.send({ data: user });

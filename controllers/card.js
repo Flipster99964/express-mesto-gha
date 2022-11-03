@@ -32,3 +32,14 @@ module.exports.deleteCard = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+module.exports.likeCard = (req, res) => {
+  card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+    .then((cards) => res.send({ data: cards }))
+    .catch((err) => res.status(500).send({ message: err.message }));
+};
+
+module.exports.dislikeCard = (req, res) => {
+  card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
+    .then((cards) => res.send({ data: cards }))
+    .catch((err) => res.status(500).send({ message: err.message }));
+};
