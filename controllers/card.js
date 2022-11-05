@@ -1,45 +1,78 @@
 const card = require('../models/card');
+const {
+  ERROR_CODE_BAD_REQUEST,
+  ERROR_CODE_NOT_FOUND,
+  ERROR_CODE_INTERNAL,
+} = require('../constants');
 
 module.exports.getCards = (req, res) => {
   card.find({})
-    .then((cards) => res.send({ data: cards }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .then((cards) => res.status(200).send({ data: cards })
+    )
+    .catch(() => res.status(ERROR_CODE_INTERNAL).send({ message: 'На сервере произошла ошибка' })
+    );
 };
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
+  const owner = req.user._id;
 
-  card.create({ name, link, owner: req.user._id })
-    .then((card) => res.send({
-      name: card.name,
-      link: card.link,
-      owner: card.owner,
-      likes: card.likes,
-      _id: card._id,
-      createAt: card.createAt,
-    }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+  card.create({ name, link, owner })
+  .then((card) => res.status(200).send({
+    name: card.name,
+    link: card.link,
+  }))
+  .catch((err) => {
+    if (err.name === 'ValidationError') {
+      res.status(ERROR_CODE_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки' });
+    } else {
+      res.status(ERROR_CODE_INTERNAL).send({ message: 'На сервере произошла ошибка' });
+    }
+  });
 };
 
 module.exports.deleteCard = (req, res) => {
-  console.log('req = ', req);
   card.findByIdAndRemove(req.params.cardId)
     .then((cards) => res.send({ data: cards }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'карта не найдена' });
+        res.status(ERROR_CODE_BAD_REQUEST).send({ message: err.message });
       }
-      res.status(500).send({ message: err.message });
+      return res.status(ERROR_CODE_INTERNAL).send({ message: 'На сервере произошла ошибка' });
     });
 };
 module.exports.likeCard = (req, res) => {
-  card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
-    .then((cards) => res.send({ data: cards }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+  сard.findByIdAndUpdate(
+    req.params.cardId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true },
+  )
+    .then((cards) => {
+      res.status(200).send({ data: cards });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(ERROR_CODE_BAD_REQUEST).send({ message: err.message });
+      } else {
+        res.status(ERROR_CODE_INTERNAL).send({ message: 'На сервере произошла ошибка' });
+      }
+    });
 };
 
 module.exports.dislikeCard = (req, res) => {
-  card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
-    .then((cards) => res.send({ data: cards }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+  Сard.findByIdAndUpdate(
+    req.params.cardId,
+    { $pull: { likes: req.user._id } },
+    { new: true },
+  )
+    .then((cards) => {
+      res.status(200).send({ data: cards });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(ERROR_CODE_NOT_FOUND).send({ message: err.message });
+      } else {
+        res.status(ERROR_CODE_INTERNAL).send({ message: 'На сервере произошла ошибка' });
+      }
+    });
 };
