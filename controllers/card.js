@@ -14,10 +14,10 @@ module.exports.getCards = (req, res) => {
 };
 
 module.exports.createCard = (req, res) => {
-  const { name, link } = req.body;
+  const { name, link, id } = req.body;
   const owner = req.user._id;
 
-  Card.create({ name, link, owner })
+  Card.create({ name, link, id, owner })
   .then((card) => res.status(200).send({
     name: card.name,
     link: card.link,
