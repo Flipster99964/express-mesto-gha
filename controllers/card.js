@@ -34,7 +34,13 @@ module.exports.createCard = (req, res) => {
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then((cards) => res.send({ data: cards }))
+  .then((cards) => {
+    if (!cards) {
+      res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
+    } else {
+      res.send({ data: cards });
+    }
+  })
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_CODE_BAD_REQUEST).send({ message: err.message });
@@ -70,14 +76,18 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((cards) => {
-      res.status(200).send({ data: cards });
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERROR_CODE_BAD_REQUEST).send({ message: err.message });
-      } else {
-        res.status(ERROR_CODE_INTERNAL).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+  .then((cards) => {
+    if (!cards) {
+      // отправить ошибку 404
+      res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Передан несуществующий _id карточки.' });
+    }
+    res.status(200).send({ data: cards });
+  })
+  .catch((err) => {
+    if (err.name === 'CastError') {
+      res.status(ERROR_CODE_BAD_REQUEST).send({ message: err.message });
+    } else {
+      res.status(ERROR_CODE_INTERNAL).send({ message: 'На сервере произошла ошибка' });
+    }
+  });
 };
