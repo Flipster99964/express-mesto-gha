@@ -7,24 +7,21 @@ const {
 } = require('../constants');
 
 module.exports.getUserById = (req, res) => {
-  const { id } = req.params;
-
-  User.findById(id)
-    .orFail(() => {
-      const error = new Error('Пользователь по заданному id не найден');
-      error.statusCode = ERROR_CODE_NOT_FOUND;
-      throw error;
-    })
-    .then((userId) => res.status(200).send({ data: userId }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERROR_CODE_BAD_REQUEST).send({ message: 'Введен некорректный id пользователя' });
-      } else if (err.message === 'NotFound') {
-        res.status(ERROR_CODE_NOT_FOUND).send({ message: err.message });
-      } else {
-        res.status(ERROR_CODE_INTERNAL).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+  User.findById(req.params.userId)
+  .then((user) => {
+    if (user) {
+      res.status(200).send({ data: user });
+    } else {
+      res.status(ERROR_CODE_NOT_FOUND).send({ data: 'Ошибка. Пользователь не найден, попробуйте еще раз' });
+    }
+  })
+  .catch((err) => {
+    if (err.name === 'CastError') {
+      res.status(ERROR_CODE_BAD_REQUEST).send({ data: 'Ошибка. Введен некорректный id пользователя' });
+    } else {
+      res.status(ERROR_CODE_INTERNAL).send({ data: 'На сервере произошла ошибка' });
+    }
+  });
     };
 
 module.exports.getUsers = (req, res) => {
