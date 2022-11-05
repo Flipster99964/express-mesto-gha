@@ -1,4 +1,4 @@
-const card = require('../models/card');
+const Card = require('../models/card');
 const {
   ERROR_CODE_BAD_REQUEST,
   ERROR_CODE_NOT_FOUND,
@@ -6,7 +6,7 @@ const {
 } = require('../constants');
 
 module.exports.getCards = (req, res) => {
-  card.find({})
+  Card.find({})
     .then((cards) => res.status(200).send({ data: cards })
     )
     .catch(() => res.status(ERROR_CODE_INTERNAL).send({ message: 'На сервере произошла ошибка' })
@@ -17,7 +17,7 @@ module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
 
-  card.create({ name, link, owner })
+  Card.create({ name, link, owner })
   .then((card) => res.status(200).send({
     name: card.name,
     link: card.link,
@@ -33,7 +33,7 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  card.findByIdAndRemove(req.params.cardId)
+  Card.findByIdAndRemove(req.params.cardId)
     .then((cards) => res.send({ data: cards }))
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -43,25 +43,29 @@ module.exports.deleteCard = (req, res) => {
     });
 };
 module.exports.likeCard = (req, res) => {
-  сard.findByIdAndUpdate(
+  Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .then((cards) => {
-      res.status(200).send({ data: cards });
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERROR_CODE_BAD_REQUEST).send({ message: err.message });
-      } else {
-        res.status(ERROR_CODE_INTERNAL).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+  .then((cards) => {
+    if (!cards) {
+      // отправить ошибку 404
+      res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Передан несуществующий _id карточки.' });
+    }
+    res.status(200).send({ data: cards });
+  })
+  .catch((err) => {
+    if (err.name === 'CastError') {
+      res.status(ERROR_CODE_BAD_REQUEST).send({ message: err.message });
+    } else {
+      res.status(ERROR_CODE_INTERNAL).send({ message: 'На сервере произошла ошибка' });
+    }
+  });
 };
 
 module.exports.dislikeCard = (req, res) => {
-  Сard.findByIdAndUpdate(
+  Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
     { new: true },
