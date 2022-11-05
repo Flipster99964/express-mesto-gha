@@ -12,17 +12,17 @@ module.exports.getUserById = (req, res) => {
     if (user) {
       res.status(200).send({ data: user });
     } else {
-      res.status(ERROR_CODE_NOT_FOUND).send({ data: 'Ошибка. Пользователь не найден, попробуйте еще раз' });
+      res.status(ERROR_CODE_NOT_FOUND).send({ message: 'Ошибка. Пользователь не найден, попробуйте еще раз' });
     }
   })
   .catch((err) => {
     if (err.name === 'CastError') {
-      res.status(ERROR_CODE_BAD_REQUEST).send({ data: 'Ошибка. Введен некорректный id пользователя' });
+      res.status(ERROR_CODE_BAD_REQUEST).send({ message: 'Ошибка. Введен некорректный id пользователя' });
     } else {
-      res.status(ERROR_CODE_INTERNAL).send({ data: 'На сервере произошла ошибка' });
+      res.status(ERROR_CODE_INTERNAL).send({ message: 'На сервере произошла ошибка' });
     }
   });
-    };
+  };
 
 module.exports.getUsers = (req, res) => {
   User.find({})
