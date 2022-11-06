@@ -54,10 +54,6 @@ module.exports.createUser = (req, res) => {
       res.status(ERROR_CODE_BAD_REQUEST).send({
         message: 'Переданы некорректные данные при создании пользователя',
       });
-    } else if (err.statusCode === ERROR_CODE_NOT_FOUND) {
-      res.status(ERROR_CODE_NOT_FOUND).send({
-        message: err.message,
-      });
     } else {
       res.status(ERROR_CODE_INTERNAL).send({
         message: 'На сервере произошла ошибка',
@@ -78,7 +74,7 @@ module.exports.patchUser = (req, res) => {
     runValidators: true,
   }).then((user) => {
     if (!user) {
-      res.status(ERROR_CODE_NOT_FOUND).send({
+      return res.status(ERROR_CODE_NOT_FOUND).send({
         message: 'Пользователь с указанным id не найден',
       });
     }
@@ -92,28 +88,27 @@ module.exports.patchUser = (req, res) => {
       });
     } else if (err.name === 'CastError') {
       res.status(ERROR_CODE_BAD_REQUEST).send({
-        message: 'Пользователь с указанным id не найден',
+        message: 'Передан некорректный id',
+      });
+    } else {
+      res.status(ERROR_CODE_INTERNAL).send({
+        message: 'На сервере произошла ошибка',
       });
     }
-    res.status(ERROR_CODE_INTERNAL).send({
-      message: 'На сервере произошла ошибка',
-    });
   });
 };
 module.exports.patchAvatar = (req, res) => {
   const {
-    name,
     avatar,
   } = req.body;
   User.findByIdAndUpdate(req.user._id, {
-    name,
     avatar,
   }, {
     new: true,
     runValidators: true,
   }).then((user) => {
     if (!user) {
-      res.status(ERROR_CODE_NOT_FOUND).send({
+      return res.status(ERROR_CODE_NOT_FOUND).send({
         message: 'Пользователь с указанным id не найден',
       });
     }
@@ -127,11 +122,12 @@ module.exports.patchAvatar = (req, res) => {
       });
     } else if (err.name === 'CastError') {
       res.status(ERROR_CODE_BAD_REQUEST).send({
-        message: 'Пользователь по указанному _id не найден.',
+        message: 'Передан некорректный id',
+      });
+    } else {
+      res.status(ERROR_CODE_INTERNAL).send({
+        message: 'На сервере произошла ошибка',
       });
     }
-    res.status(ERROR_CODE_INTERNAL).send({
-      message: 'На сервере произошла ошибка',
-    });
   });
 };

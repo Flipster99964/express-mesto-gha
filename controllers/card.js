@@ -16,13 +16,11 @@ module.exports.createCard = (req, res) => {
   const {
     name,
     link,
-    id,
   } = req.body;
   const owner = req.user._id;
   Card.create({
     name,
     link,
-    id,
     owner,
   }).then((card) => {
     res.send({
@@ -53,8 +51,8 @@ module.exports.deleteCard = (req, res) => {
     }
   }).catch((err) => {
     if (err.name === 'CastError') {
-      res.status(ERROR_CODE_BAD_REQUEST).send({
-        message: err.message,
+      return res.status(ERROR_CODE_BAD_REQUEST).send({
+        message: 'Передан некорректный _id карточки.',
       });
     }
     return res.status(ERROR_CODE_INTERNAL).send({
@@ -72,23 +70,22 @@ module.exports.likeCard = (req, res) => {
   }).then((cards) => {
     if (!cards) {
       // отправить ошибку 404
-      res.status(ERROR_CODE_NOT_FOUND).send({
+      return res.status(ERROR_CODE_NOT_FOUND).send({
         message: 'Передан несуществующий _id карточки.',
       });
     }
-    res.status(200).send({
+    return res.status(200).send({
       data: cards,
     });
   }).catch((err) => {
     if (err.name === 'CastError') {
-      res.status(ERROR_CODE_BAD_REQUEST).send({
-        message: err.message,
-      });
-    } else {
-      res.status(ERROR_CODE_INTERNAL).send({
-        message: 'На сервере произошла ошибка',
+      return res.status(ERROR_CODE_BAD_REQUEST).send({
+        message: 'Передан некорректный _id карточки.',
       });
     }
+    return res.status(ERROR_CODE_INTERNAL).send({
+      message: 'На сервере произошла ошибка',
+    });
   });
 };
 module.exports.dislikeCard = (req, res) => {
@@ -101,22 +98,21 @@ module.exports.dislikeCard = (req, res) => {
   }).then((cards) => {
     if (!cards) {
       // отправить ошибку 404
-      res.status(ERROR_CODE_NOT_FOUND).send({
+      return res.status(ERROR_CODE_NOT_FOUND).send({
         message: 'Передан несуществующий _id карточки.',
       });
     }
-    res.status(200).send({
+    return res.status(200).send({
       data: cards,
     });
   }).catch((err) => {
     if (err.name === 'CastError') {
-      res.status(ERROR_CODE_BAD_REQUEST).send({
-        message: err.message,
-      });
-    } else {
-      res.status(ERROR_CODE_INTERNAL).send({
-        message: 'На сервере произошла ошибка',
+      return res.status(ERROR_CODE_BAD_REQUEST).send({
+        message: 'Передан некорректный _id карточки.',
       });
     }
+    return res.status(ERROR_CODE_INTERNAL).send({
+      message: 'На сервере произошла ошибка',
+    });
   });
 };
