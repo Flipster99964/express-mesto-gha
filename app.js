@@ -25,8 +25,8 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.json());
-app.use('/users', routerUsers);
-app.use('/cards', routerCards);
+app.use('/', routerUsers);
+app.use('/', routerCards);
 // Обработка несущ. страницы
 app.use('*', (req, res) => {
   res.status(ERROR_CODE_NOT_FOUND).send({
