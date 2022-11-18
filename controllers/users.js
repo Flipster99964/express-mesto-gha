@@ -1,14 +1,14 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-
+const NotFoundError = require('../errors/not-found-error');
+const ExistEmailError = require('../errors/exist-email-error');
 const {
   ERROR_CODE_BAD_REQUEST,
   ERROR_CODE_NOT_FOUND,
   ERROR_CODE_INTERNAL,
   SEKRET_KEY,
   ERROR_CODE_BAD_AUTH,
-  ERROR_CODE_EXIST_EMAIL,
 } = require('../constants');
 
 module.exports.login = (req, res, next) => {
@@ -82,7 +82,7 @@ module.exports.createUser = (req, res) => {
         });
       }
       if (err.code === 11000) {
-        return (new ERROR_CODE_EXIST_EMAIL('Передан уже зарегистрированный email.'));
+        return (new ExistEmailError('Передан уже зарегистрированный email.'));
       }
       return res.status(ERROR_CODE_INTERNAL).send({
         message: 'На сервере произошла ошибка',
@@ -91,10 +91,10 @@ module.exports.createUser = (req, res) => {
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
-  User.findById(req.user._id)
+  User.findById(req._id)
     .then((user) => {
       if (!user) {
-        return next(new ERROR_CODE_NOT_FOUND('Пользователь по указанному _id не найден.'));
+        return next(new NotFoundError('Пользователь по указанному _id не найден.'));
       }
       return res.status(200).send(user);
     })
