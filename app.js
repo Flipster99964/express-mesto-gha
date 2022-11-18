@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const routerUsers = require('./routes/users');
-const routerCards = require('./routes/card');
+const routes = require('./routes/routes');
 const {
   ERROR_CODE_NOT_FOUND,
 } = require('./constants');
@@ -19,8 +18,7 @@ async function main() {
   });
 }
 app.use(express.json());
-app.use('/', routerUsers);
-app.use('/', routerCards);
+app.use(routes);
 // Обработка несущ. страницы
 app.use('*', (req, res) => {
   res.status(ERROR_CODE_NOT_FOUND).send({
