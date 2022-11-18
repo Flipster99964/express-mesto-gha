@@ -3,12 +3,12 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-error');
 const ExistEmailError = require('../errors/exist-email-error');
+const BadAuthError = require('../errors/bad-auth-error');
 const {
   ERROR_CODE_BAD_REQUEST,
   ERROR_CODE_NOT_FOUND,
   ERROR_CODE_INTERNAL,
   SEKRET_KEY,
-  ERROR_CODE_BAD_AUTH,
 } = require('../constants');
 
 module.exports.login = (req, res, next) => {
@@ -20,7 +20,7 @@ module.exports.login = (req, res, next) => {
       res.send({ token });
     })
     .catch(() => {
-      next(new ERROR_CODE_BAD_AUTH('Неправильные почта или пароль.'));
+      next(new BadAuthError('Неправильные почта или пароль.'));
     });
 };
 

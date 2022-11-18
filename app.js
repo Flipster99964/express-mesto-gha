@@ -1,9 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const BodyParser = require('body-parser');
+const { errors } = require('celebrate');
 const routes = require('./routes/routes');
-const {
-  ERROR_CODE_NOT_FOUND,
-} = require('./constants');
+const cenralErrors = require('./middlewares/central-error');
 
 const app = express();
 const PORT = 3000;
@@ -17,12 +17,11 @@ async function main() {
     console.log(`App listening on port ${PORT}`);
   });
 }
+app.use(BodyParser.json());
 app.use(express.json());
 app.use(routes);
-// Обработка несущ. страницы
-app.use('*', (req, res) => {
-  res.status(ERROR_CODE_NOT_FOUND).send({
-    message: `Страницы по адресу ${req.baseUrl} не существует`,
-  });
-});
+
+app.use(errors());
+app.use(cenralErrors);
+
 main();
