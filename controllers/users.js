@@ -88,14 +88,11 @@ module.exports.createUser = (req, res, next) => {
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
-  User.findById(req.params.userId)
-    .then((user) => {
-      if (!user) {
-        return next(new NotFoundError('Пользователь по указанному _id не найден.'));
-      }
-      return res.status(200).send(user);
-    })
-    .catch((err) => next(err));
+  const { _id } = req.user;
+
+  User.find({ _id })
+    .then((user) => res.status(200).send({ data: user[0] }))
+    .catch(next);
 };
 
 module.exports.patchUser = (req, res) => {

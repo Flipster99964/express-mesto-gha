@@ -23,7 +23,8 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     // required: true,
-    default: 'https://ixbt.online/live/topics/preview/00/03/02/87/4a92b1f01e.jpg',
+    default:
+    'https://antropogenez.ru/uploads/tx_antropedia/121457057_fotoZHakIvKusto1590x367.jpg',
   },
   email: {
     type: String,
