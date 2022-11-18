@@ -4,6 +4,7 @@ const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-error');
 const ExistEmailError = require('../errors/exist-email-error');
 const BadAuthError = require('../errors/bad-auth-error');
+const BadRequestError = require('../errors/bad-request-error');
 const {
   ERROR_CODE_BAD_REQUEST,
   ERROR_CODE_NOT_FOUND,
@@ -54,7 +55,7 @@ module.exports.getUsers = (req, res) => {
     message: 'На сервере произошла ошибка',
   }));
 };
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name,
     about,
@@ -77,16 +78,12 @@ module.exports.createUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE_BAD_REQUEST).send({
-          message: 'Переданы некорректные данные при создании пользователя',
-        });
+        return next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
       }
       if (err.code === 11000) {
-        return (new ExistEmailError('Передан уже зарегистрированный email.'));
+        return next(new ExistEmailError('Передан уже зарегистрированный email.'));
       }
-      return res.status(ERROR_CODE_INTERNAL).send({
-        message: 'На сервере произошла ошибка',
-      });
+      return next(err);
     });
 };
 
