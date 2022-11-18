@@ -18,12 +18,6 @@ async function main() {
     console.log(`App listening on port ${PORT}`);
   });
 }
-app.use((req, res, next) => {
-  req.user = { // это _id созданного пользователя 'Тест'
-    _id: '6361330e7fb5e960cb101f85',
-  };
-  next();
-});
 app.use(express.json());
 app.use('/', routerUsers);
 app.use('/', routerCards);

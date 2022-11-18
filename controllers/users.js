@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
@@ -7,6 +8,7 @@ const {
   ERROR_CODE_INTERNAL,
   SEKRET_KEY,
   ERROR_CODE_BAD_AUTH,
+  ERROR_CODE_EXIST_EMAIL,
 } = require('../constants');
 
 module.exports.login = (req, res, next) => {
@@ -57,27 +59,48 @@ module.exports.createUser = (req, res) => {
     name,
     about,
     avatar,
+    email, password,
   } = req.body;
-  User.create({
-    name,
-    about,
-    avatar,
-  }).then((users) => {
-    res.status(200).send({
-      data: users,
-    });
-  }).catch((err) => {
-    if (err.name === 'ValidationError') {
-      res.status(ERROR_CODE_BAD_REQUEST).send({
-        message: 'Переданы некорректные данные при создании пользователя',
+  if (!email || !password) {
+    return res.status(ERROR_CODE_BAD_REQUEST).send({ message: 'Поля email и password обязательны' });
+  }
+
+  // хешируем пароль
+  return bcrypt.hash(req.body.password, 10)
+    .then((hash) => User.create({
+      name, about, avatar, email: req.body.email, password: hash,
+    }))
+    .then((user) => {
+      res.status(200).send({
+        name: user.name, about: user.about, avatar: user.avatar, _id: user._id, email: user.email,
       });
-    } else {
-      res.status(ERROR_CODE_INTERNAL).send({
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(ERROR_CODE_BAD_REQUEST).send({
+          message: 'Переданы некорректные данные при создании пользователя',
+        });
+      }
+      if (err.code === 11000) {
+        return (new ERROR_CODE_EXIST_EMAIL('Передан уже зарегистрированный email.'));
+      }
+      return res.status(ERROR_CODE_INTERNAL).send({
         message: 'На сервере произошла ошибка',
       });
-    }
-  });
+    });
 };
+
+module.exports.getCurrentUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        return next(new ERROR_CODE_NOT_FOUND('Пользователь по указанному _id не найден.'));
+      }
+      return res.status(200).send(user);
+    })
+    .catch((err) => next(err));
+};
+
 module.exports.patchUser = (req, res) => {
   const {
     name,
