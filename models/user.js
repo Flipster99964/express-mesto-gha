@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const {
   ERROR_CODE_BAD_AUTH,
 } = require('../constants');
+const { AVATAR_REGEX } = require('../constants');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -24,7 +25,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     // required: true,
     default:
-    'https://antropogenez.ru/uploads/tx_antropedia/121457057_fotoZHakIvKusto1590x367.jpg',
+    'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    validate: {
+      validator: (v) => AVATAR_REGEX.test(v),
+      message: 'Некорректная ссылка',
+    },
   },
   email: {
     type: String,
