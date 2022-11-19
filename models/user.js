@@ -1,9 +1,7 @@
 const mongoose = require('mongoose');
 const isEmail = require('validator/lib/isEmail');
 const bcrypt = require('bcryptjs');
-const {
-  ERROR_CODE_BAD_AUTH,
-} = require('../constants');
+const BadAuthError = require('../errors/bad-auth-error');
 const { AVATAR_REGEX } = require('../constants');
 
 const userSchema = new mongoose.Schema({
@@ -51,12 +49,12 @@ userSchema.statics.findUserByCredentials = function findUser(email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new ERROR_CODE_BAD_AUTH('Неправильные почта или пароль'));
+        return Promise.reject(new BadAuthError('Неправильные почта или пароль'));
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new ERROR_CODE_BAD_AUTH('Неправильные почта или пароль'));
+            return Promise.reject(new BadAuthError('Неправильные почта или пароль'));
           }
           return user;
         });

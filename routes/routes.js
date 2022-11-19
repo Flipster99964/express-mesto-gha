@@ -52,6 +52,6 @@ app.use(auth);
 app.use(userRouter);
 app.use(cardRouter);
 
-app.use('*', auth, (req, res, next) => next(new NotFoundError(`Страницы по адресу ${req.baseUrl} не существует`)));
+app.use('*', (req, res, next) => next(new NotFoundError(`Страницы по адресу ${req.baseUrl} не существует`)));
 
 module.exports = app;
