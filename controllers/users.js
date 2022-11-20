@@ -25,14 +25,10 @@ module.exports.login = (req, res, next) => {
 module.exports.getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail(() => {
-      next(new NotFoundError('Пользователь не найден, попробуйте еще раз'));
+      throw new NotFoundError('Пользователь не найден, попробуйте еще раз');
     })
     .then((user) => {
-      if (user) {
-        res.send(user);
-      } else {
-        throw (new NotFoundError('Пользователь не найден, попробуйте еще раз'));
-      }
+      res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
